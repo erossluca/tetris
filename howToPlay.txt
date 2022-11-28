@@ -1,0 +1,14 @@
+A játék indítása után a játékos a billentyűzet adott 
+gombjait használva tudja mozgatni az alakzatokat:
+
+JOBB és BAL nyilak: 
+az tetrominókat vízszintesen jobbra és balra mozgatják
+
+FEL és LE nyilak: 
+az alakzatokat forgatják 90 fokkal jobbra és balra mozgatják
+
+SPACE: 
+az alakzatokat ledobja a képernyő aljára
+
+ESC: 
+a játék szüneteltethető
