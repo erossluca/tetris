@@ -7,7 +7,6 @@ import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.Scanner;
 
 public class Menu extends JFrame
@@ -15,6 +14,7 @@ public class Menu extends JFrame
     private static final long serialVersionUID = 1L;
 
     private final String gameDescription = "howToPlay.txt";
+    private String howToPlayTxt;
     private final String topListTxt = "topListTxt.txt";
 
     private static JPanel titlePanel;
@@ -88,11 +88,14 @@ public class Menu extends JFrame
         exitButton.setForeground(Color.LIGHT_GRAY);
         exitButton.setFont(new Font("Arial", Font.PLAIN, 25));
 
-        topListReading();
+        topListReading(topListTxt);
     }
 
     /**
      * Elkészíti a "Játék indítása" ponthoz szükséges handler-t
+     * Bekéri a játékos nevét, amennyiben nem lesz megadva név
+     * vagy a játékos a Cancel gombot választotta, visszatér a
+     * főmenübe
      */
     final class startButtonActionListener implements ActionListener
     {
@@ -102,12 +105,20 @@ public class Menu extends JFrame
             buttonPanel.setVisible(false);
 
             String name = JOptionPane.showInputDialog("Enter your name:");
+            if((name != null) && name.length() > 0)
+            {
             Scores newPlayer = new Scores(Board.getScoreList().size()+1, name, 0);
             Board.getScoreList().add(newPlayer);
 
             Tetris game = new Tetris();
             game.startGame();
             dispose();
+            }
+            else
+            {
+                titlePanel.setVisible(true);
+                buttonPanel.setVisible(true);
+            }
         }
     }
 
@@ -121,7 +132,11 @@ public class Menu extends JFrame
             titlePanel.setVisible(false);
             buttonPanel.setVisible(false);
 
-            createManualWindow();
+            try {
+                createManualWindow();
+            } catch (FileNotFoundException ex) {
+                ex.printStackTrace();
+            }
 
             manualPanel.setVisible(true);
         }
@@ -133,8 +148,7 @@ public class Menu extends JFrame
      * A második a felhasználói kézikönyvet írja ki
      * A harmadik pedig a "Vissza a menübe" gombot tartalmazza
      */
-    public void createManualWindow()
-    {
+    public void createManualWindow() throws FileNotFoundException {
         getContentPane().setBackground(Color.pink);
         setLayout(null);
         manualPanel = new JPanel();
@@ -148,7 +162,8 @@ public class Menu extends JFrame
         manualPanelText = new JPanel();
         manualPanelText.setBounds(10,70,400,350);
 
-        JTextArea descText = new JTextArea(loadManual(gameDescription));
+        loadManual(gameDescription);
+        JTextArea descText = new JTextArea(howToPlayTxt);
         descText.setEditable(false);
 
         manualPanelText.setBackground(Color.pink);
@@ -168,6 +183,7 @@ public class Menu extends JFrame
         add(manualPanelText);
         add(manualButtonPanel);
 
+        manualButtonPanel.repaint();
     }
 
     /**
@@ -197,7 +213,7 @@ public class Menu extends JFrame
             buttonPanel.setVisible(true);
 
             topListPanel.setVisible(false);
-            topListTextPanel.setVisible(false);
+            //topListTextPanel.setVisible(false);
             topListButtonPanel.setVisible(false);
         }
     }
@@ -205,16 +221,14 @@ public class Menu extends JFrame
     /**
      * Beolvassa fájlból a felhasználói kézikönyvet
      * @param fileName a beolvasandó fájl neve
-     * @return visszatér a beolvasott fájllal
      */
-    public String loadManual(String fileName)
+    public void loadManual(String fileName) throws FileNotFoundException
     {
         try
         {
-            String howToPlay = new Scanner(new File(fileName)).useDelimiter("\\Z").next();
-            return howToPlay;
+            howToPlayTxt = new Scanner(new File(fileName)).useDelimiter("\\Z").next();
         }
-        catch(FileNotFoundException e) {return "A fájl nem található";}
+        catch(FileNotFoundException e) {throw new FileNotFoundException();}
     }
 
     /**
@@ -228,6 +242,7 @@ public class Menu extends JFrame
     {
         getContentPane().setBackground(Color.pink);
         setLayout(null);
+
         topListPanel = new JPanel();
         topListPanel.setBounds(60, 80, 300, 100);
         topListPanel.setBackground(Color.pink);
@@ -237,7 +252,7 @@ public class Menu extends JFrame
         topListLabel.setFont(new Font("Arial", Font.BOLD, 35));
         topListPanel.add(topListLabel);
 
-        topListTextPanel = new JPanel();
+        /*topListTextPanel = new JPanel();
         topListTextPanel.setBounds(10,150,400,350);
         topListTextPanel.setBackground(Color.pink);
 
@@ -249,8 +264,10 @@ public class Menu extends JFrame
                 String name = scores.get(i).getName();
                 int score = scores.get(i).getScore();
 
-                JTextArea currScore = new JTextArea(place + " " + name + " " + score);
-                currScore.setEditable(false);
+                String scoreToShow = place + " " + name + " " + score;
+
+                JTextArea currScore = new JTextArea(scoreToShow);
+                currScore.setBounds(10, 10, 300, 300);
                 currScore.setBackground(Color.pink);
                 currScore.setForeground(Color.DARK_GRAY);
                 topListTextPanel.add(currScore);
@@ -262,19 +279,21 @@ public class Menu extends JFrame
             emptyScoreTxt.setBackground(Color.pink);
             emptyScoreTxt.setForeground(Color.DARK_GRAY);
             topListTextPanel.add(emptyScoreTxt);
-        }
-
+        }*/
         topListButtonPanel = new JPanel();
         topListButtonPanel.setBounds(125,430,200,40);
         topListButtonPanel.setBackground(Color.pink);
+
         backToMainMenuButton.addActionListener(new backToMainMenuFromTopList());
         backToMainMenuButton.setBackground(Color.pink);
         backToMainMenuButton.setForeground(Color.DARK_GRAY);
 
         topListButtonPanel.add(backToMainMenuButton);
         add(topListPanel);
-        add(topListTextPanel);
+        //add(topListTextPanel);
         add(topListButtonPanel);
+
+
     }
 
     /**
@@ -287,11 +306,10 @@ public class Menu extends JFrame
             titlePanel.setVisible(false);
             buttonPanel.setVisible(false);
 
-            topListReading();
             createTopListWindow(Board.getScoreList());
 
             topListPanel.setVisible(true);
-            topListTextPanel.setVisible(true);
+            //topListTextPanel.setVisible(true);
             topListButtonPanel.setVisible(true);
 
         }
@@ -300,11 +318,10 @@ public class Menu extends JFrame
     /**
      * Beolvassa fájlból a ranglistát
     */
-    public void topListReading()
-    {
+    public void topListReading(String file)  {
         try
         {
-            FileInputStream fs = new FileInputStream("topListTxt.txt");
+            FileInputStream fs = new FileInputStream(file);
             ObjectInputStream ois = new ObjectInputStream(fs);
             Board.setScoreList((ArrayList) ois.readObject());
             Collections.sort(Board.getScoreList(), Scores.compareByScores());
@@ -312,8 +329,8 @@ public class Menu extends JFrame
             ois.close();
             fs.close();
         }
-        catch(FileNotFoundException e){}
-        catch(IOException | ClassNotFoundException e){}
+        catch(FileNotFoundException e){ e.printStackTrace();}
+        catch(IOException | ClassNotFoundException e){e.printStackTrace();}
 
     }
 

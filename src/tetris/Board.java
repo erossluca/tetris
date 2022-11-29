@@ -111,18 +111,18 @@ public class Board extends JPanel {
      * Elindítja a játékot
      */
     public void startGame() {
-        //current_piece = new Tetromino();
+
         board = new Tetrominoes[BOARD_WIDTH * BOARD_HEIGHT];
 
         clearBoard();
         newPiece();
 
-        timer = new Timer(SPEED, null); //???
+        timer = new Timer(SPEED, null);
         timer.start();
     }
 
     /**
-     * Szünetelteti a játékot, de egyelőre csak elméletben TODO
+     * Szünetelteti a játékot
      */
     public void pauseGame() {
         is_paused = !is_paused;
@@ -400,7 +400,7 @@ public class Board extends JPanel {
             ous.close();
             fs.close();
         }
-        catch(IOException e){}
+        catch(IOException e){e.printStackTrace();}
     }
 
     /**

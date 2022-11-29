@@ -1,7 +1,6 @@
 package tetris;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.Comparator;
 
 public class Scores implements Serializable
@@ -64,6 +63,7 @@ public class Scores implements Serializable
 
     /**
      * A pontszámok összehasonlítását végzi
+     * Közben ellenőrzi a helyezéseket is és cseréli, ha szükséges
      * @return visszaadja a 2 pontszám közül a nagyobbat
      */
     public static Comparator<Scores> compareByScores()
