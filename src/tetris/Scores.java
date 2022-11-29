@@ -68,7 +68,17 @@ public class Scores implements Serializable
      */
     public static Comparator<Scores> compareByScores()
     {
-        Comparator<Scores> comparator = Comparator.comparingInt(Scores::getScore);
+        Comparator<Scores> comparator = (o1, o2) -> {
+            if(o2.getScore() > o1.getScore())
+            {
+                while(o2.getPlace() > o1.getPlace()) {
+                    int temp = o2.getPlace();
+                    o2.setPlace(o1.getPlace());
+                    o1.setPlace(temp);
+                }
+            }
+            return Integer.compare(o1.getScore(), o2.getScore());
+        };
         return comparator;
     }
 }

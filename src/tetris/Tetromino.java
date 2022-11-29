@@ -4,11 +4,11 @@ import java.util.Random;
 
 public class Tetromino {
     protected enum Tetrominoes {
-        Empty, Sshape, Zshape, Tshape, Lshape, Jshape, Ishape, Oshape
+        EmptyShape, Sshape, Zshape, Tshape, Lshape, Jshape, Ishape, Oshape
     }
 
-    private Tetrominoes piece = Tetrominoes.Empty;
-    private int[][] coordinates;
+    private Tetrominoes piece = Tetrominoes.EmptyShape;
+    private final int[][] coordinates;
 
     /**
      * Tetromino konstruktora
@@ -16,7 +16,7 @@ public class Tetromino {
      */
     public Tetromino() {
         coordinates = new int[4][2];
-        setShape(Tetrominoes.Empty);
+        setRandomShape();
     }
 
     /**
@@ -97,6 +97,8 @@ public class Tetromino {
         int rand_num = Math.abs(rand.nextInt()) % 7 + 1;
 
         Tetrominoes[] values = Tetrominoes.values();
+        while(values[rand_num] == Tetrominoes.EmptyShape)
+            rand_num = Math.abs(rand.nextInt()) % 7 + 1;
         setShape(values[rand_num]);
     }
 
@@ -136,7 +138,7 @@ public class Tetromino {
      */
     public Tetromino rotateLeft()
     {
-        //if(piece == Tetrominoes.Oshape) return this;
+        //if(piece.ordinal() == 7) return this;
 
         Tetromino result = new Tetromino();
         result.piece = piece;
@@ -156,7 +158,7 @@ public class Tetromino {
      */
     public Tetromino rotateRight()
     {
-        //if(piece == Tetrominoes.Oshape) return this;
+        //if(piece.ordinal() == 7) return this;
 
         Tetromino result = new Tetromino();
         result.piece = piece;

@@ -23,21 +23,16 @@ public class Menu extends JFrame
     private static JPanel topListPanel;
     private static JPanel topListTextPanel;
     private static JPanel topListButtonPanel;
+
     private static JPanel manualPanel;
     private static JPanel manualPanelText;
     private static JPanel manualButtonPanel;
 
-    private Tetris game = new Tetris();
-
-    private JTextArea descText;
-    private JTextArea currScore;
-    private JTextArea emptyScoreTxt;
-
-    private JButton startButton = new JButton("Játék indítása");
-    private JButton manualButton = new JButton("Játék menete");
-    private JButton topListButton = new JButton("Ranglista");
-    private JButton exitButton = new JButton("Kilépés");
-    private JButton backToMainMenuButton = new JButton("Vissza a menübe");
+    private final JButton startButton = new JButton("Játék indítása");
+    private final JButton manualButton = new JButton("Játék menete");
+    private final JButton topListButton = new JButton("Ranglista");
+    private final JButton exitButton = new JButton("Kilépés");
+    private final JButton backToMainMenuButton = new JButton("Vissza a menübe");
 
     /**
      * A főmenü konstruktora
@@ -105,8 +100,14 @@ public class Menu extends JFrame
         {
             titlePanel.setVisible(false);
             buttonPanel.setVisible(false);
-            game = new Tetris();
+
+            String name = JOptionPane.showInputDialog("Enter your name:");
+            Scores newPlayer = new Scores(Board.getScoreList().size()+1, name, 0);
+            Board.getScoreList().add(newPlayer);
+
+            Tetris game = new Tetris();
             game.startGame();
+            dispose();
         }
     }
 
@@ -147,7 +148,7 @@ public class Menu extends JFrame
         manualPanelText = new JPanel();
         manualPanelText.setBounds(10,70,400,350);
 
-        descText = new JTextArea(loadManual(gameDescription));
+        JTextArea descText = new JTextArea(loadManual(gameDescription));
         descText.setEditable(false);
 
         manualPanelText.setBackground(Color.pink);
@@ -248,7 +249,8 @@ public class Menu extends JFrame
                 String name = scores.get(i).getName();
                 int score = scores.get(i).getScore();
 
-                currScore = new JTextArea(place + " " + name + " " + score);
+                JTextArea currScore = new JTextArea(place + " " + name + " " + score);
+                currScore.setEditable(false);
                 currScore.setBackground(Color.pink);
                 currScore.setForeground(Color.DARK_GRAY);
                 topListTextPanel.add(currScore);
@@ -256,7 +258,7 @@ public class Menu extends JFrame
         }
         else
         {
-            emptyScoreTxt = new JTextArea("A ranglista üres");
+            JTextArea emptyScoreTxt = new JTextArea("A ranglista üres");
             emptyScoreTxt.setBackground(Color.pink);
             emptyScoreTxt.setForeground(Color.DARK_GRAY);
             topListTextPanel.add(emptyScoreTxt);
@@ -286,7 +288,7 @@ public class Menu extends JFrame
             buttonPanel.setVisible(false);
 
             topListReading();
-            createTopListWindow(Board.scores);
+            createTopListWindow(Board.getScoreList());
 
             topListPanel.setVisible(true);
             topListTextPanel.setVisible(true);
@@ -304,8 +306,9 @@ public class Menu extends JFrame
         {
             FileInputStream fs = new FileInputStream("topListTxt.txt");
             ObjectInputStream ois = new ObjectInputStream(fs);
-            Board.scores = (ArrayList) ois.readObject();
-            Collections.sort(Board.scores, Scores.compareByScores());
+            Board.setScoreList((ArrayList) ois.readObject());
+            Collections.sort(Board.getScoreList(), Scores.compareByScores());
+            Collections.reverse(Board.getScoreList());
             ois.close();
             fs.close();
         }

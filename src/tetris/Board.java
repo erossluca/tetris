@@ -10,6 +10,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class Board extends JPanel {
 
@@ -21,14 +22,14 @@ public class Board extends JPanel {
 
     private Timer timer;
     private JLabel status;
-    private Tetromino current_piece;
+    private Tetromino current_piece = new Tetromino();
     private int current_x, current_y = 0;
     private Tetrominoes[] board;
     private boolean is_paused = false;
     private boolean fallen = false;
     private int removed_lines = 0;
 
-    public static ArrayList<Scores> scores = new ArrayList<>(); //nemszabaaad
+    private static ArrayList<Scores> scores = new ArrayList<>();
 
     private boolean gameOver = false;
     private Tetris parent;
@@ -55,6 +56,24 @@ public class Board extends JPanel {
         setFocusable(true);
         status = _parent.getStatus();
         addKeyListener(new TetrisAdapter());
+    }
+
+    /**
+     * Getter
+     * @return visszaadja a ranglistát tartalmazó ArrayList-et
+     */
+    public static ArrayList<Scores> getScoreList()
+    {
+        return scores;
+    }
+
+    /**
+     * Setter
+     * @param _scores a paraméterként kapott ArrayList-tel inicializálja a Board ranglistáját
+     */
+    public static void setScoreList(ArrayList _scores)
+    {
+        scores = _scores;
     }
 
     /**
@@ -92,7 +111,7 @@ public class Board extends JPanel {
      * Elindítja a játékot
      */
     public void startGame() {
-        current_piece = new Tetromino();
+        //current_piece = new Tetromino();
         board = new Tetrominoes[BOARD_WIDTH * BOARD_HEIGHT];
 
         clearBoard();
@@ -159,7 +178,7 @@ public class Board extends JPanel {
      */
     public void clearBoard() {
         for (int i = 0; i < BOARD_HEIGHT * BOARD_WIDTH; i++) {
-            board[i] = Tetrominoes.Empty;
+            board[i] = Tetrominoes.EmptyShape;
         }
     }
 
@@ -174,7 +193,7 @@ public class Board extends JPanel {
             boolean full_line = true;
 
             for (int j = 0; j < BOARD_WIDTH; j++) {
-                if (shapePlace(j, i) == Tetrominoes.Empty) {
+                if (shapePlace(j, i) == Tetrominoes.EmptyShape) {
                     full_line = false;
                     break;
                 }
@@ -195,7 +214,7 @@ public class Board extends JPanel {
             removed_lines += no_full_lines;
             fallen = true;
             status.setText(String.valueOf(removed_lines));
-            current_piece.setShape(Tetrominoes.Empty);
+            current_piece.setRandomShape();
 
         }
     }
@@ -210,7 +229,7 @@ public class Board extends JPanel {
         current_y = BOARD_HEIGHT - 1 + current_piece.minY();
 
         if (!tryMove(current_piece, current_x, current_y)) {
-            current_piece.setShape(Tetrominoes.Empty);
+            current_piece.setRandomShape();
             timer.stop();
             gameOver = true;
             String message = "Game over. Score: " + removed_lines;
@@ -234,7 +253,7 @@ public class Board extends JPanel {
             if (x < 0 || x >= BOARD_WIDTH || y < 0 || y >= BOARD_HEIGHT)
                 return false;
 
-            if (shapePlace(x, y) != Tetrominoes.Empty)
+            if (shapePlace(x, y) != Tetrominoes.EmptyShape)
                 return false;
         }
 
@@ -260,12 +279,12 @@ public class Board extends JPanel {
             for (int j = 0; j < BOARD_WIDTH; j++) {
                 Tetrominoes piece = shapePlace(j, BOARD_HEIGHT - i - 1);
 
-                if (piece != Tetrominoes.Empty)
+                if (piece != Tetrominoes.EmptyShape)
                     drawSquare(_g, j * squareWidth(), board_top + i * squareHeight(), piece);
             }
         }
 
-        if (current_piece.getShape() != Tetrominoes.Empty) {
+        if (current_piece.getShape() != Tetrominoes.EmptyShape) {
             for (int i = 0; i < 4; i++) {
                 int x = current_x + current_piece.getX(i);
                 int y = current_y - current_piece.getY(i);
@@ -294,7 +313,7 @@ public class Board extends JPanel {
     }
 
     /**
-     * Alakzatok színeit állítja
+     * Alakzatok színeit beállítja
      * Kirajzolja az alakzatokat négyzetekből felépítve
      *
      * @param _g
@@ -353,11 +372,10 @@ public class Board extends JPanel {
          * Frissíti a játéktáblát
          * Amikor leesett az alakzat, újat kér, addig pedig egy sorral folyamatosan lejjebb helyezi
          */
-        private void update() {
-            if (is_paused == true)
-                return;
-
-            if (fallen) {
+        private void update()
+        {
+            if (fallen)
+            {
                 fallen = false;
                 newPiece();
             } else
@@ -374,9 +392,10 @@ public class Board extends JPanel {
         {
             FileOutputStream fs = new FileOutputStream("topListTxt.txt");
             ObjectOutputStream ous = new ObjectOutputStream(fs);
-            Scores newScore = new Scores(scores.size()+1, "teszt", removed_lines);
-            scores.add(newScore);
-            System.out.println(newScore.getPlace() + newScore.getName() + newScore.getScore());
+            scores.get(scores.size() - 1 ).setScore(removed_lines);
+            Collections.sort(scores, Scores.compareByScores());
+            Collections.reverse(scores);
+
             ous.writeObject(scores);
             ous.close();
             fs.close();
@@ -393,7 +412,7 @@ public class Board extends JPanel {
         @Override
         public void keyPressed(KeyEvent e)
         {
-            if(current_piece.getShape() == Tetrominoes.Empty)
+            if(current_piece.getShape() == Tetrominoes.EmptyShape)
                 return;
 
             int key_code = e.getKeyCode();
