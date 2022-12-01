@@ -103,21 +103,6 @@ public class Tetromino {
     }
 
     /**
-     * @return Adott alakzat legkisebb x koordinátáját adja vissza
-     */
-    public int minX()
-    {
-        int min = coordinates[0][0];
-
-        for(int i = 0; i < 4; i++)
-        {
-            min = Math.min(min, coordinates[i][0]);
-        }
-
-        return min;
-    }
-
-    /**
      * @return Adott alakzat legkisebb y koordinátáját adja vissza
      */
     public int minY()
@@ -138,8 +123,6 @@ public class Tetromino {
      */
     public Tetromino rotateLeft()
     {
-        //if(piece.ordinal() == 7) return this;
-
         Tetromino result = new Tetromino();
         result.piece = piece;
 
@@ -158,8 +141,6 @@ public class Tetromino {
      */
     public Tetromino rotateRight()
     {
-        //if(piece.ordinal() == 7) return this;
-
         Tetromino result = new Tetromino();
         result.piece = piece;
 

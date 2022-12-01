@@ -6,11 +6,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Scanner;
 
 public class Menu extends JFrame
 {
+
     private static final long serialVersionUID = 1L;
 
     private final String gameDescription = "howToPlay.txt";
@@ -148,8 +148,8 @@ public class Menu extends JFrame
      * A második a felhasználói kézikönyvet írja ki
      * A harmadik pedig a "Vissza a menübe" gombot tartalmazza
      */
-    public void createManualWindow() throws FileNotFoundException {
-        getContentPane().setBackground(Color.pink);
+    public void createManualWindow() throws FileNotFoundException
+    {
         setLayout(null);
         manualPanel = new JPanel();
         manualPanel.setBounds(50,30,340,30);
@@ -189,7 +189,7 @@ public class Menu extends JFrame
     /**
      * Elkészíti a "Játék menete" képernyőhöz tartozó "Vissza a menübe" gomb handler-ét
      */
-    final class backToMainMenuFromManual implements ActionListener
+    static final class backToMainMenuFromManual implements ActionListener
     {
         public void actionPerformed(ActionEvent e)
         {
@@ -205,7 +205,7 @@ public class Menu extends JFrame
     /**
      * Elkészíti a "Ranglista" ponthoz tartozó képernyőn lévő "Vissza a menübe" gomb handler-ét
      */
-    final class backToMainMenuFromTopList implements ActionListener
+    static final class backToMainMenuFromTopList implements ActionListener
     {
         public void actionPerformed(ActionEvent e)
         {
@@ -213,7 +213,7 @@ public class Menu extends JFrame
             buttonPanel.setVisible(true);
 
             topListPanel.setVisible(false);
-            //topListTextPanel.setVisible(false);
+            topListTextPanel.setVisible(false);
             topListButtonPanel.setVisible(false);
         }
     }
@@ -224,11 +224,7 @@ public class Menu extends JFrame
      */
     public void loadManual(String fileName) throws FileNotFoundException
     {
-        try
-        {
-            howToPlayTxt = new Scanner(new File(fileName)).useDelimiter("\\Z").next();
-        }
-        catch(FileNotFoundException e) {throw new FileNotFoundException();}
+        howToPlayTxt = new Scanner(new File(fileName)).useDelimiter("\\Z").next();
     }
 
     /**
@@ -240,11 +236,10 @@ public class Menu extends JFrame
      */
     public void createTopListWindow(ArrayList<Scores> scores)
     {
-        getContentPane().setBackground(Color.pink);
         setLayout(null);
 
         topListPanel = new JPanel();
-        topListPanel.setBounds(60, 80, 300, 100);
+        topListPanel.setBounds(60, 80, 300, 50);
         topListPanel.setBackground(Color.pink);
 
         JLabel topListLabel = new JLabel("Ranglista");
@@ -252,25 +247,29 @@ public class Menu extends JFrame
         topListLabel.setFont(new Font("Arial", Font.BOLD, 35));
         topListPanel.add(topListLabel);
 
-        /*topListTextPanel = new JPanel();
-        topListTextPanel.setBounds(10,150,400,350);
+        topListTextPanel = new JPanel();
+        topListTextPanel.setBounds(200,150,400,200);
         topListTextPanel.setBackground(Color.pink);
 
-        if(scores != null)
+
+        if(!scores.isEmpty())
         {
-            for(int i = 0; i < scores.size(); i++)
+            int no_of_loops = Math.min(scores.size(), 3);
+            for(int i = 0; i < no_of_loops ; i++)
             {
                 int place = scores.get(i).getPlace();
                 String name = scores.get(i).getName();
                 int score = scores.get(i).getScore();
 
-                String scoreToShow = place + " " + name + " " + score;
+                String scoreToShow = place + " " + name + " " + score + "\n";
 
                 JTextArea currScore = new JTextArea(scoreToShow);
-                currScore.setBounds(10, 10, 300, 300);
                 currScore.setBackground(Color.pink);
                 currScore.setForeground(Color.DARK_GRAY);
                 topListTextPanel.add(currScore);
+
+                BoxLayout layout = new BoxLayout(topListTextPanel, BoxLayout.Y_AXIS);
+                topListTextPanel.setLayout(layout);
             }
         }
         else
@@ -279,7 +278,7 @@ public class Menu extends JFrame
             emptyScoreTxt.setBackground(Color.pink);
             emptyScoreTxt.setForeground(Color.DARK_GRAY);
             topListTextPanel.add(emptyScoreTxt);
-        }*/
+        }
         topListButtonPanel = new JPanel();
         topListButtonPanel.setBounds(125,430,200,40);
         topListButtonPanel.setBackground(Color.pink);
@@ -290,10 +289,10 @@ public class Menu extends JFrame
 
         topListButtonPanel.add(backToMainMenuButton);
         add(topListPanel);
-        //add(topListTextPanel);
+        add(topListTextPanel);
         add(topListButtonPanel);
 
-
+        topListButtonPanel.repaint();
     }
 
     /**
@@ -309,35 +308,39 @@ public class Menu extends JFrame
             createTopListWindow(Board.getScoreList());
 
             topListPanel.setVisible(true);
-            //topListTextPanel.setVisible(true);
-            topListButtonPanel.setVisible(true);
-
         }
     }
 
     /**
      * Beolvassa fájlból a ranglistát
+     * Amennyiben a fájl még nem létezik, létrehozza azt
     */
-    public void topListReading(String file)  {
+    public void topListReading(String _file)
+    {
         try
         {
-            FileInputStream fs = new FileInputStream(file);
-            ObjectInputStream ois = new ObjectInputStream(fs);
-            Board.setScoreList((ArrayList) ois.readObject());
-            Collections.sort(Board.getScoreList(), Scores.compareByScores());
-            Collections.reverse(Board.getScoreList());
-            ois.close();
-            fs.close();
-        }
-        catch(FileNotFoundException e){ e.printStackTrace();}
-        catch(IOException | ClassNotFoundException e){e.printStackTrace();}
+            File file = new File(_file);
 
+            if (!file.exists())
+                file.createNewFile();
+
+            if (file.length() != 0) {
+
+                FileInputStream fs = new FileInputStream(file);
+                ObjectInputStream ois = new ObjectInputStream(fs);
+                Board.setScoreList((ArrayList) ois.readObject());
+                Board.getScoreList().sort(Scores.compareByScores());
+                ois.close();
+                fs.close();
+            }
+        } catch (IOException | ClassNotFoundException fileNotFoundException) {fileNotFoundException.printStackTrace();}
     }
+
 
     /**
      * Elkészíti a "Kilépés" gombhoz tartozó handler-t
      */
-    final class exitActionListener implements ActionListener
+    static final class exitActionListener implements ActionListener
     {
         public void actionPerformed(ActionEvent e)
         {

@@ -1,10 +1,12 @@
 package tetris;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Comparator;
 
 public class Scores implements Serializable
 {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private int place;
@@ -62,13 +64,13 @@ public class Scores implements Serializable
     public int getScore() {return this.score;}
 
     /**
-     * A pontszámok összehasonlítását végzi
+     * A pontszámok összehasonlítását végzi, csökkenő sorrendben való kiíráshoz kell
      * Közben ellenőrzi a helyezéseket is és cseréli, ha szükséges
-     * @return visszaadja a 2 pontszám közül a nagyobbat
+     * @return visszatér a nagyobb pontszámmal
      */
     public static Comparator<Scores> compareByScores()
     {
-        Comparator<Scores> comparator = (o1, o2) -> {
+        return (o1, o2) -> {
             if(o2.getScore() > o1.getScore())
             {
                 while(o2.getPlace() > o1.getPlace()) {
@@ -77,8 +79,7 @@ public class Scores implements Serializable
                     o1.setPlace(temp);
                 }
             }
-            return Integer.compare(o1.getScore(), o2.getScore());
+            return Integer.compare(o2.getScore(), o1.getScore());
         };
-        return comparator;
     }
 }

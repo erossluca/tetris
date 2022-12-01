@@ -14,6 +14,7 @@ import java.util.Collections;
 
 public class Board extends JPanel {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final int BOARD_WIDTH = 15;
@@ -22,12 +23,12 @@ public class Board extends JPanel {
 
     private Timer timer;
     private JLabel status;
-    private Tetromino current_piece = new Tetromino();
-    private int current_x, current_y = 0;
+    private Tetromino currentPiece = new Tetromino();
+    private int currentX, currentY = 0;
     private Tetrominoes[] board;
-    private boolean is_paused = false;
+    private boolean isPaused = false;
     private boolean fallen = false;
-    private int removed_lines = 0;
+    private int removedLines = 0;
 
     private static ArrayList<Scores> scores = new ArrayList<>();
 
@@ -83,16 +84,14 @@ public class Board extends JPanel {
      * @param _y y koordináta
      * @return visszaadja egy Tetrominoes tömbben az alakzatot
      */
-    public Tetrominoes shapePlace(int _x, int _y) {
-        return board[(_y * BOARD_WIDTH) + _x];
-    }
+    public Tetrominoes shapePlace(int _x, int _y) {return board[(_y * BOARD_WIDTH) + _x];}
 
     /**
      * Meghatározza egy darab négyzet szélességét
      *
      * @return
      */
-    private int squareWidth() {
+    public int squareWidth() {
 
         return (int) getSize().getWidth() / BOARD_WIDTH;
     }
@@ -102,7 +101,7 @@ public class Board extends JPanel {
      *
      * @return
      */
-    private int squareHeight() {
+    public int squareHeight() {
 
         return (int) getSize().getHeight() / BOARD_HEIGHT;
     }
@@ -112,7 +111,7 @@ public class Board extends JPanel {
      */
     public void startGame() {
 
-        board = new Tetrominoes[BOARD_WIDTH * BOARD_HEIGHT];
+        board = new Tetrominoes[500];
 
         clearBoard();
         newPiece();
@@ -125,11 +124,11 @@ public class Board extends JPanel {
      * Szünetelteti a játékot
      */
     public void pauseGame() {
-        is_paused = !is_paused;
-        if (is_paused)
+        isPaused = !isPaused;
+        if (isPaused)
             status.setText("paused");
         else
-            status.setText(String.valueOf(removed_lines));
+            status.setText(String.valueOf(removedLines));
 
         repaint();
     }
@@ -137,19 +136,19 @@ public class Board extends JPanel {
     /**
      * Egy sorral lejjebb helyezi az alakzatot, ha a következő sorban még szabad a hely
      */
-    private void oneLineDown() {
-        if (!tryMove(current_piece, current_x, current_y - 1))
+    public void oneLineDown() {
+        if (!tryMove(currentPiece, currentX, currentY - 1))
             pieceDropped();
     }
 
     /**
      * A lehető legalacsonyabb helyre teszi az alakzatot, ahol még nincs másik
      */
-    private void dropDown() {
-        int temp_y = current_y;
+    public void dropDown() {
+        int temp_y = currentY;
 
         while (temp_y > 0) {
-            if (!tryMove(current_piece, current_x, temp_y - 1))
+            if (!tryMove(currentPiece, currentX, temp_y - 1))
                 break;
 
             temp_y--;
@@ -160,11 +159,11 @@ public class Board extends JPanel {
     /**
      * Amikor leér az alakzat, a függvény megnézi, lett-e teli sor, amennyiben igen, törli azt
      */
-    private void pieceDropped() {
+    public void pieceDropped() {
         for (int i = 0; i < 4; i++) {
-            int x = current_x + current_piece.getX(i);
-            int y = current_y - current_piece.getY(i);
-            board[(y * BOARD_WIDTH) + x] = current_piece.getShape();
+            int x = currentX + currentPiece.getX(i);
+            int y = currentY - currentPiece.getY(i);
+            board[(y * BOARD_WIDTH) + x] = currentPiece.getShape();
         }
 
         removeLine();
@@ -211,10 +210,10 @@ public class Board extends JPanel {
         }
 
         if (no_full_lines > 0) {
-            removed_lines += no_full_lines;
+            removedLines += no_full_lines;
             fallen = true;
-            status.setText(String.valueOf(removed_lines));
-            current_piece.setRandomShape();
+            status.setText(String.valueOf(removedLines));
+            currentPiece.setRandomShape();
 
         }
     }
@@ -224,15 +223,15 @@ public class Board extends JPanel {
      * Ezután megnézi, hogy az alakzattól betelt-e a tábla
      */
     public void newPiece() {
-        current_piece.setRandomShape();
-        current_x = BOARD_WIDTH / 2 + 1;
-        current_y = BOARD_HEIGHT - 1 + current_piece.minY();
+        currentPiece.setRandomShape();
+        currentX = BOARD_WIDTH / 2 + 1;
+        currentY = BOARD_HEIGHT - 1 + currentPiece.minY();
 
-        if (!tryMove(current_piece, current_x, current_y)) {
-            current_piece.setRandomShape();
+        if (!tryMove(currentPiece, currentX, currentY)) {
+            currentPiece.setRandomShape();
             timer.stop();
             gameOver = true;
-            String message = "Game over. Score: " + removed_lines;
+            String message = "Game over. Score: " + removedLines;
             status.setText(message);
         }
     }
@@ -257,9 +256,9 @@ public class Board extends JPanel {
                 return false;
         }
 
-        current_piece = _new;
-        current_x = _new_x;
-        current_y = _new_y;
+        currentPiece = _new;
+        currentX = _new_x;
+        currentY = _new_y;
 
         repaint();
         return true;
@@ -271,7 +270,7 @@ public class Board extends JPanel {
      *
      * @param _g
      */
-    private void draw(Graphics _g) {
+    public void draw(Graphics _g) {
         var size = getSize();
         int board_top = (int) size.getHeight() - BOARD_HEIGHT * squareHeight();
 
@@ -284,17 +283,17 @@ public class Board extends JPanel {
             }
         }
 
-        if (current_piece.getShape() != Tetrominoes.EmptyShape) {
+        if (currentPiece.getShape() != Tetrominoes.EmptyShape) {
             for (int i = 0; i < 4; i++) {
-                int x = current_x + current_piece.getX(i);
-                int y = current_y - current_piece.getY(i);
+                int x = currentX + currentPiece.getX(i);
+                int y = currentY - currentPiece.getY(i);
 
                 drawSquare(_g, x * squareWidth(), board_top + (BOARD_HEIGHT - y - 1) * squareHeight(),
-                        current_piece.getShape());
+                        currentPiece.getShape());
             }
         }
 
-        if(gameOver == true)
+        if(gameOver)
         {
             saveTopList();
             parent.dispose();
@@ -321,7 +320,7 @@ public class Board extends JPanel {
      * @param _y     y koordináta
      * @param _shape aktuális alakzat
      */
-    private void drawSquare(Graphics _g, int _x, int _y, Tetrominoes _shape) {
+    public void drawSquare(Graphics _g, int _x, int _y, Tetrominoes _shape) {
         Color colors[] =
                 {new Color(0, 0, 0),
                         new Color(204, 102, 102),
@@ -360,8 +359,8 @@ public class Board extends JPanel {
         /**
          * Frissíti és újrarajzolja a játékot
          */
-        private void gameCycle() {
-            if (is_paused == false) {
+        public void gameCycle() {
+            if (isPaused == false) {
                 update();
                 repaint();
             }
@@ -372,7 +371,7 @@ public class Board extends JPanel {
          * Frissíti a játéktáblát
          * Amikor leesett az alakzat, újat kér, addig pedig egy sorral folyamatosan lejjebb helyezi
          */
-        private void update()
+        public void update()
         {
             if (fallen)
             {
@@ -392,7 +391,7 @@ public class Board extends JPanel {
         {
             FileOutputStream fs = new FileOutputStream("topListTxt.txt");
             ObjectOutputStream ous = new ObjectOutputStream(fs);
-            scores.get(scores.size() - 1 ).setScore(removed_lines);
+            scores.get(scores.size() - 1 ).setScore(removedLines);
             Collections.sort(scores, Scores.compareByScores());
             Collections.reverse(scores);
 
@@ -412,7 +411,7 @@ public class Board extends JPanel {
         @Override
         public void keyPressed(KeyEvent e)
         {
-            if(current_piece.getShape() == Tetrominoes.EmptyShape)
+            if(currentPiece.getShape() == Tetrominoes.EmptyShape)
                 return;
 
             int key_code = e.getKeyCode();
@@ -420,10 +419,10 @@ public class Board extends JPanel {
             switch(key_code)
             {
                 case KeyEvent.VK_ESCAPE -> pauseGame();
-                case KeyEvent.VK_LEFT -> tryMove(current_piece, current_x - 1, current_y);
-                case KeyEvent.VK_RIGHT -> tryMove(current_piece, current_x + 1, current_y);
-                case KeyEvent.VK_UP -> tryMove(current_piece.rotateRight(), current_x, current_y);
-                case KeyEvent.VK_DOWN -> tryMove(current_piece.rotateLeft(), current_x, current_y);
+                case KeyEvent.VK_LEFT -> tryMove(currentPiece, currentX - 1, currentY);
+                case KeyEvent.VK_RIGHT -> tryMove(currentPiece, currentX + 1, currentY);
+                case KeyEvent.VK_UP -> tryMove(currentPiece.rotateRight(), currentX, currentY);
+                case KeyEvent.VK_DOWN -> tryMove(currentPiece.rotateLeft(), currentX, currentY);
                 case KeyEvent.VK_SPACE -> dropDown();
                 case KeyEvent.VK_D -> oneLineDown();
             }
